@@ -27,6 +27,36 @@ class GraphAdtDirected {
 
         ~GraphAdtDirected() {}
 
+        // Getters and setters for the various member variables of the graph
+        std::vector<std::vector<uint>> getAdjacencyMatrix() {
+
+            return graph->getAdjMatrix();
+        }
+
+        std::vector<std::vector<uint>> getTransitiveClosure() {
+
+            return graph->getTransClos();
+        }
+
+        void AddEdge(int firstNode, int secondNode) {
+
+            /*
+            if(AddToList(firstNode, secondNode) && AddToMatrix(firstNode, secondNode)) {
+
+                return true;
+            }
+            else {
+
+                return false;
+            }
+            */
+
+            if(AddToList(firstNode, secondNode) && AddToMatrix(firstNode, secondNode)) {
+
+                std::cout << "Added " << firstNode << " and " << secondNode << " to the graph" << std::endl;
+            }
+        }
+
         // Add edge from firstNode to secondNode to directed graph
         bool AddToList(int firstNode, int secondNode) {
 
@@ -45,12 +75,13 @@ class GraphAdtDirected {
             return true;
         }
 
-        // Add edge from firstNode to secondNode for adj matrix in a directed graph
+        // Add edge from firstNode to secondNode including self cycles for adj matrix in a directed graph
         bool AddToMatrix(int firstNode, int secondNode) {
 
             // Assuming this edge has not already been added to the matrix and 
             // that the edge is being added to a directed graph
             graph->adjMatrix.at(firstNode).at(secondNode) = 1;
+            graph->adjMatrix.at(firstNode).at(firstNode) = 1;
 
             return true;
         }
@@ -70,10 +101,10 @@ class GraphAdtDirected {
             }
         }
 
-        // Function to calculate transitive closure on directed graph 
-        // in order to find all connectivity options
+        // function that finds the transitive closure for a directed cyclic graph
         void TransitiveClosure() {
 
+            graph->setTransitiveClosure(graph->adjMatrix);
             for(int i = 0; i < graphSize; i++) {
 
                 for(int s = 0; s < graphSize; s++) {

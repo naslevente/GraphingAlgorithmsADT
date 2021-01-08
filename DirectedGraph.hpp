@@ -25,6 +25,13 @@ class DirectedGraph: public Graph {
             strongComponents = std::vector<int>(vertices, -1);
             transitiveClosure = std::vector<std::vector<uint>>(vertices, std::vector<uint>(vertices));
             dagTransitiveClosure = std::vector<std::vector<uint>>(vertices, std::vector<uint>(vertices));
+
+            for(int i = 0; i < vertices; i++) {
+
+                transitiveClosure.at(i).at(i) = 1;
+                dagTransitiveClosure.at(i).at(i) = 1;
+                adjMatrix.at(i).at(i) = 1;
+            }
         }
 
         ~DirectedGraph() {}
@@ -39,9 +46,14 @@ class DirectedGraph: public Graph {
             return reverseTopological;;
         }
 
-        std::vector<std::vector<uint>> getTransitiveClosure() {
+        std::vector<std::vector<uint>> getTransClos() {
 
             return transitiveClosure;
+        }
+
+        void setTransitiveClosure(std::vector<std::vector<uint>> inputMatrix) {
+
+            transitiveClosure = std::move(inputMatrix);
         }
 };
 #endif
