@@ -36,21 +36,6 @@ class DirectedGraph: public Graph {
 
         ~DirectedGraph() {}
 
-        std::vector<int> getStrongComponents() {
-
-            return strongComponents;
-        }
-
-        std::vector<int> getReverseTopological() {
-
-            return reverseTopological;;
-        }
-
-        std::vector<std::vector<uint>> getTransClos() {
-
-            return transitiveClosure;
-        }
-
         void setTransitiveClosure(std::vector<std::vector<uint>> inputMatrix) {
 
             transitiveClosure = std::move(inputMatrix);

@@ -30,12 +30,17 @@ class GraphAdtDirected {
         // Getters and setters for the various member variables of the graph
         std::vector<std::vector<uint>> getAdjacencyMatrix() {
 
-            return graph->getAdjMatrix();
+            return graph->adjMatrix;
         }
 
         std::vector<std::vector<uint>> getTransitiveClosure() {
 
-            return graph->getTransClos();
+            return graph->transitiveClosure;
+        }
+
+        std::vector<int> getTopologicalSort() {
+
+            return graph->topological;
         }
 
         void AddEdge(int firstNode, int secondNode) {
@@ -141,23 +146,37 @@ class GraphAdtDirected {
         }
 
         // Function to find the topological sorting of a DAG
-        void Topological(int startNode, int& count) {
+        void Topological(int startNode) {
 
-            graph->orderVector.at(startNode) = position;
+            int count = 0;
+            for(int i = 0; i < graph->vertices; i++) {
+
+                if(graph->orderVector.at(i) == -1) {
+
+                    std::cout << "Entered the recursion" << std::endl;
+                    RecursiveTopological(i, count);
+                }
+            }
+        }
+
+        // Recursively find a topological sorting
+        void RecursiveTopological(int node, int& count) {
+
+            graph->orderVector.at(node) = position;
             position++;
 
             for(int i = 0; i < graph->vertices; i++) {
 
-                if(graph->adjMatrix.at(i).at(startNode) != 0) {
+                if(graph->adjMatrix.at(i).at(node)) {
 
                     if(graph->orderVector.at(i) == -1) {
 
-                        Topological(i, count);
+                        RecursiveTopological(i, count);
                     }
                 }
             }
 
-            graph->topological.at(count) = startNode;
+            graph->topological.at(count) = node;
             count++;
         }
 

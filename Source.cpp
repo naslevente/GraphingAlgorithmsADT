@@ -6,11 +6,14 @@
 #include "GraphAdtUndirected.hpp"
 #include "GraphAdtDirected.hpp"
 
-void OutputMatrix(std::vector<std::vector<uint>> inputMatrix, uint graphSize) {
+#define SIZE 13
 
-    for(int i = 0; i < graphSize; i++) {
+// Display functions
+void OutputMatrix(std::vector<std::vector<uint>> inputMatrix) {
 
-        for(int k = 0; k < graphSize; k++) {
+    for(int i = 0; i < SIZE; i++) {
+
+        for(int k = 0; k < SIZE; k++) {
 
             std::cout << inputMatrix.at(i).at(k);
         }
@@ -19,13 +22,21 @@ void OutputMatrix(std::vector<std::vector<uint>> inputMatrix, uint graphSize) {
     }
 }
 
+void OutputVector(std::vector<int> inputVector) {
+
+    for(int i = 0; i < SIZE; i++) {
+
+        std::cout << inputVector.at(i) << " ";
+    }
+
+    std::cout << "\n";
+}
+
 int main() {
 
-    int graphSize = 6;
-
     /*
-    size_t graphSize = 8;
-    GraphAdtUndirected graph(graphSize);
+    size_t SIZE = 8;
+    GraphAdtUndirected graph(SIZE);
 
     graph.AddEdge(0, 2);
     graph.AddEdge(0, 7);
@@ -43,8 +54,7 @@ int main() {
     graph.DepthFirstSearchList(0);
     */
 
-    /*
-    GraphAdtDirected graphDag(graphSize);
+    GraphAdtDirected graphDag(SIZE);
 
     graphDag.AddEdge(0, 1);
     graphDag.AddEdge(0, 2);
@@ -64,13 +74,15 @@ int main() {
     graphDag.AddEdge(11, 12);
 
     std::vector<std::vector<uint>> adjMatrix = graphDag.getAdjacencyMatrix();
-    graphDag.TransitiveClosure();
-    std::vector<std::vector<uint>> transitiveClosure = graphDag.getTransitiveClosure();
-    
-    OutputMatrix(transitiveClosure);
-    */
 
-    GraphAdtDirected graphDag(graphSize);
+    int count = 0;
+    graphDag.Topological(0);
+    std::vector<int> topological = graphDag.getTopologicalSort();
+    
+    OutputVector(topological);
+
+    /*
+    GraphAdtDirected graphDag(SIZE);
 
     graphDag.AddEdge(0, 2);
     graphDag.AddEdge(0, 5);
@@ -85,5 +97,6 @@ int main() {
     graphDag.TransitiveClosure();
     std::vector<std::vector<uint>> transitiveClosure = graphDag.getTransitiveClosure();
     
-    OutputMatrix(transitiveClosure, graphSize);
+    OutputMatrix(transitiveClosure);
+    */
 }

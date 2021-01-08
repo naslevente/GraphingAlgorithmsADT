@@ -24,7 +24,7 @@ class Graph {
             vertices = numVert;
 
             // Define the size for the order and adjMatrix vector
-            orderVector = std::vector<int>(vertices);
+            orderVector = std::vector<int>(vertices, -1);
             adjMatrix = std::vector<std::vector<uint>>(vertices, std::vector<uint>(vertices));
 
             for(int i = 0; i < vertices; i++) {
@@ -44,16 +44,6 @@ class Graph {
 
             node.get()->next = std::make_shared<link>(vert);
             return true;
-        }
-
-        std::vector<int> getOrder() {
-
-            return orderVector;
-        }
-
-        std::vector<std::vector<uint>> getAdjMatrix() {
-
-            return adjMatrix;
         }
 };
 #endif
