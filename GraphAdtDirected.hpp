@@ -15,6 +15,18 @@ class GraphAdtDirected {
         uint position = 1;
         std::unique_ptr<DirectedGraph> graph;
 
+        // Template function
+        void BeginOperation(void (GraphAdtDirected::*func) (int, int&), int startNode, int& count) {
+
+            for(int i = 0; i < graph->vertices; i++) {
+
+                if(graph->orderVector.at(i) == -1) {
+
+                    (this->*func)(i, count);                  
+                }
+            }
+        }
+
     public:
 
         GraphAdtDirected(size_t numVert) {
@@ -59,6 +71,34 @@ class GraphAdtDirected {
             if(AddToList(firstNode, secondNode) && AddToMatrix(firstNode, secondNode)) {
 
                 std::cout << "Added " << firstNode << " and " << secondNode << " to the graph" << std::endl;
+            }
+        }
+
+        /* Series of functions that use the BeginOperation function 
+        to recursively find the respectuive soolution */
+
+        // Function to find the topological sorting of a DAG
+        void StartTopological(int startNode) {
+
+            int count = 0;
+            BeginOperation(&GraphAdtDirected::Topological, startNode, count);
+        }
+
+        void StartReverseTopological(int startNode) {
+
+            int count = 0;
+            BeginOperation(&GraphAdtDirected::ReverseTopological, startNode, count);
+        }
+
+        void StartDagTransitiveClosure(int startNode) {
+
+            int count = 0;
+            BeginOperation(&GraphAdtDirected::ReverseTopological, startNode, count);
+
+            for(int i = 0; i < graph->vertices; i++) {
+
+                int startNode = graph->reverseTopological.at(i);
+                DagTransitiveClosure(startNode);
             }
         }
 
@@ -145,22 +185,8 @@ class GraphAdtDirected {
             }
         }
 
-        // Function to find the topological sorting of a DAG
-        void Topological(int startNode) {
-
-            int count = 0;
-            for(int i = 0; i < graph->vertices; i++) {
-
-                if(graph->orderVector.at(i) == -1) {
-
-                    std::cout << "Entered the recursion" << std::endl;
-                    RecursiveTopological(i, count);
-                }
-            }
-        }
-
         // Recursively find a topological sorting
-        void RecursiveTopological(int node, int& count) {
+        void Topological(int node, int& count) {
 
             graph->orderVector.at(node) = position;
             position++;
@@ -171,7 +197,7 @@ class GraphAdtDirected {
 
                     if(graph->orderVector.at(i) == -1) {
 
-                        RecursiveTopological(i, count);
+                        Topological(i, count);
                     }
                 }
             }
@@ -180,7 +206,7 @@ class GraphAdtDirected {
             count++;
         }
 
-        void DAGTransClosure(int node) {
+        void DagTransitiveClosure(int node) {
 
             for(int i = 0; i < graph->vertices; i++) {
 
@@ -190,7 +216,7 @@ class GraphAdtDirected {
                     graph->dagTransitiveClosure.at(i).at(index) = 1;
                     if(graph->orderVector.at(index) == -1) {
 
-                        DAGTransClosure(index);
+                        DagTransitiveClosure(index);
                     }
 
                     for(int p = 0; p < graph->vertices; p++) {
@@ -201,25 +227,6 @@ class GraphAdtDirected {
                         }
                     }
                 }
-            }
-        }
-
-        void DagTransitiveClosure() {
-
-            int count = 0;
-            // Loop through each vertex to find the reverse topological sort
-            for(int i = 0; i < graph->vertices; i++) {
-
-                if(graph->orderVector.at(i) == -1) {
-
-                    ReverseTopological(i, count);
-                }
-            }
-
-            for(int i = 0; i < graph->vertices; i++) {
-
-                int startNode = graph->reverseTopological.at(i);
-                DAGTransClosure(startNode);
             }
         }
 
