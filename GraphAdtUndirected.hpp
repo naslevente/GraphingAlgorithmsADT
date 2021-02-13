@@ -51,7 +51,7 @@ class GraphAdtUndirected {
 
             if(AddToList(firstNode, secondNode) && AddToMatrix(firstNode, secondNode)) {
 
-                std::cout << "Added " << firstNode << " and " << secondNode << " to the graph" << std::endl;
+                std::cout << "added " << firstNode << " and " << secondNode << " to the graph" << std::endl;
             }
         }
 

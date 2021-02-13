@@ -12,6 +12,7 @@ class Graph {
     public:
 
         std::vector<std::shared_ptr<link>> adjList;
+        std::vector<std::shared_ptr<link>> reverseAdjList;
 
         // count/order of the nodes from a dfs
         std::vector<int> orderVector;
@@ -30,7 +31,10 @@ class Graph {
             for(int i = 0; i < vertices; i++) {
 
                 std::shared_ptr<link> newLink = std::make_shared<link>(i);
+                std::shared_ptr<link> newReverseLink = std::make_shared<link>(i);
+
                 adjList.push_back(newLink);
+                reverseAdjList.push_back(newReverseLink);
 
                 for(int k = 0; k < vertices; k++) {
 
@@ -43,6 +47,7 @@ class Graph {
         bool AddLink(int vert, std::shared_ptr<link> node) {
 
             node.get()->next = std::make_shared<link>(vert);
+
             return true;
         }
 };
