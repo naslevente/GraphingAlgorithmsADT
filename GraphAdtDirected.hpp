@@ -15,6 +15,7 @@ class GraphAdtDirected {
         uint graphSize;
         uint position = 0;
         std::unique_ptr<DirectedGraph> graph;
+        std::unique_ptr<DirectedGraph> kernelDag;
 
         std::vector<int> low;
         std::stack<int> tarjansStack;
@@ -31,6 +32,8 @@ class GraphAdtDirected {
             }
         }
 
+    public:
+
         // reset the count/order of the nodes
         void ResetOrderVector() {
 
@@ -39,8 +42,6 @@ class GraphAdtDirected {
 
             position = 0;
         }
-
-    public:
 
         GraphAdtDirected(size_t numVert) {
 
@@ -297,24 +298,27 @@ class GraphAdtDirected {
             count++;
         }
 
-        void DagTransitiveClosure(int node) {
+        void DagTransitiveClosure(std::unique_ptr<DirectedGraph> directedGraph, int node) {
 
-            for(int i = 0; i < graph->vertices; i++) {
+            directedGraph->orderVector.at(node) = position;
+            ++position;
 
-                int index = graph->reverseTopological.at(i);
-                if(graph->adjMatrix.at(node).at(index) != 0) {
+            for(int i = 0; i < directedGraph->vertices; i++) {
 
-                    graph->dagTransitiveClosure.at(i).at(index) = 1;
-                    if(graph->orderVector.at(index) == -1) {
+                //int index = graph->reverseTopological.at(i);
+                if(directedGraph->adjMatrix.at(node).at(i) != 0) {
 
-                        DagTransitiveClosure(index);
+                    directedGraph->dagTransitiveClosure.at(i).at(i) = 1;
+                    if(directedGraph->orderVector.at(i) == -1) {
+
+                        DagTransitiveClosure(i);
                     }
 
-                    for(int p = 0; p < graph->vertices; p++) {
+                    for(int p = 0; p < directedGraph->vertices; p++) {
 
-                        if(graph->adjMatrix.at(index).at(p) != 0) {
+                        if(directedGraph->adjMatrix.at(i).at(p) != 0) {
 
-                            graph->dagTransitiveClosure.at(i).at(p) = 1;
+                            directedGraph->dagTransitiveClosure.at(i).at(p) = 1;
                         }
                     }
                 }
@@ -368,6 +372,41 @@ class GraphAdtDirected {
                 if(graph->orderVector.at(firstNode->vert) == -1) {
 
                     DFSTarjans(firstNode->vert, count, componentCount);
+                }
+            }
+        }
+
+        void FindKernelDag() {
+
+            auto maxElement = max_element(std::begin(graph->strongComponents), std::end(graph->strongComponents));
+            kernelDag = std::make_unique<DirectedGraph>(maxElement + 1);
+
+            for(int i = 0; i < graph->vertices; i++) {
+
+                std::shared_ptr<link> node;
+                for(node = graph->adjList.at(i)->next; node != NULL; node = node->next) {
+
+                    kernelDag->adjMatrix.at(graph-strongComponents.at(i)).at(graph->strongComponents.at(node->vert)) = 1;
+                }
+            }
+        }        
+
+        // strong component based transitive closure algorithm
+        void SCTransClosure() {
+
+            // first find the strong components of the graph using either 
+            // tarjans or kosarajus
+            Kosarajus();
+
+            // find the kernel DAG using the strong components
+            FindKernelDag();
+
+            // find the transitive closure based on the kernel dag
+            for(int i = 0; i < kernelDag->vertices; ++i) {
+
+                if(kernelDag->orderVector.at(i) == -1) {
+
+                    DagTransitiveClosure(kernelDag, i);
                 }
             }
         }
