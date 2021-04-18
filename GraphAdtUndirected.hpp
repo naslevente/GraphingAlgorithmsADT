@@ -6,8 +6,9 @@
 
 #include <vector>
 #include "DirectedGraph.hpp"
+#include "GraphAdtInterface.hpp"
 
-class GraphAdtUndirected {
+class GraphAdtUndirected : GraphAdtInterface {
 
     private:
 

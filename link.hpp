@@ -6,6 +6,7 @@
 
 #ifndef LINKHEADER
 #define LINKHEADER
+
 class link {
 
     public:

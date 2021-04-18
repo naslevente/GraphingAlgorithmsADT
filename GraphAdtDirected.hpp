@@ -4,11 +4,13 @@
 #include <memory>
 #include <ostream>
 #include <stack>
+#include <algorithm>
 
 #include <vector>
 #include "DirectedGraph.hpp"
+#include "GraphAdtInterface.hpp"
 
-class GraphAdtDirected {
+class GraphAdtDirected : public GraphAdtInterface {
 
     private:
 
@@ -80,6 +82,7 @@ class GraphAdtDirected {
             return graph->reverseTopological;
         }
 
+        /*
         void AddEdge(int firstNode, int secondNode) {
 
             /*
@@ -91,7 +94,6 @@ class GraphAdtDirected {
 
                 return false;
             }
-            */
 
             // adding edge to graph
             if(AddToList(firstNode, secondNode) && AddToMatrix(firstNode, secondNode)) {
@@ -99,6 +101,7 @@ class GraphAdtDirected {
                 std::cout << "added edge from " << firstNode << " to " << secondNode << " to the graph" << std::endl;
             }
         }
+        */
 
         /* Series of functions that use the BeginOperation function 
         to recursively find the respectuive soolution */
@@ -116,31 +119,19 @@ class GraphAdtDirected {
             BeginOperation(&GraphAdtDirected::ReverseTopological, startNode, count);
         }
 
-        void StartDagTransitiveClosure(int startNode) {
-
-            int count = 0;
-            BeginOperation(&GraphAdtDirected::ReverseTopological, startNode, count);
-
-            for(int i = 0; i < graph->vertices; i++) {
-
-                int startNode = graph->reverseTopological.at(i);
-                DagTransitiveClosure(startNode);
-            }
-        }
-
         // Add edge from firstNode to secondNode to directed graph
         bool AddToList(int firstNode, int secondNode) {
 
             // add edge to the graph
             std::shared_ptr<link> copyPointer = graph->adjList.at(firstNode);
-            while(!(copyPointer->next.get() == NULL)) {
+            while(!(copyPointer->next.get() == nullptr)) {
 
                 copyPointer = copyPointer.get()->next;
             }
 
             // add edge to the reverse graph
             std::shared_ptr<link> secondCopyPointer = graph->reverseAdjList.at(secondNode);
-            while(!(secondCopyPointer->next.get() == NULL)) {
+            while(!(secondCopyPointer->next.get() == nullptr)) {
 
                 secondCopyPointer = secondCopyPointer.get()->next;
             }
@@ -200,7 +191,7 @@ class GraphAdtDirected {
             std::shared_ptr<link> newNode;
 
             tarjansStack.push(node);
-            for(newNode = graph->adjList.at(node); node != NULL; newNode = newNode.get()->next) {
+            for(newNode = graph->adjList.at(node); newNode != nullptr; newNode = newNode.get()->next) {
 
                 if(graph->orderVector.at(newNode.get()->vert) == -1) {
 
@@ -259,12 +250,12 @@ class GraphAdtDirected {
             std::shared_ptr<link> nodePointer;
             nodePointer = graph->reverseAdjList.at(startNode);
 
-            if(nodePointer.get()->next.get() == NULL) {
+            if(nodePointer.get()->next.get() == nullptr) {
 
-                std::cout << "pointing to null" << std::endl;
+                std::cout << "pointing to nullptr" << std::endl;
             }
 
-            for(nodePointer = graph->reverseAdjList.at(startNode)->next; nodePointer != NULL; 
+            for(nodePointer = graph->reverseAdjList.at(startNode)->next; nodePointer != nullptr; 
                 nodePointer = nodePointer.get()->next) {
 
                 if(graph->orderVector.at(nodePointer.get()->vert) == -1) {
@@ -298,7 +289,7 @@ class GraphAdtDirected {
             count++;
         }
 
-        void DagTransitiveClosure(std::unique_ptr<DirectedGraph> directedGraph, int node) {
+        void DagTransitiveClosure(std::unique_ptr<DirectedGraph> &directedGraph, int node) {
 
             directedGraph->orderVector.at(node) = position;
             ++position;
@@ -311,7 +302,7 @@ class GraphAdtDirected {
                     directedGraph->dagTransitiveClosure.at(i).at(i) = 1;
                     if(directedGraph->orderVector.at(i) == -1) {
 
-                        DagTransitiveClosure(i);
+                        DagTransitiveClosure(directedGraph, i);
                     }
 
                     for(int p = 0; p < directedGraph->vertices; p++) {
@@ -367,7 +358,7 @@ class GraphAdtDirected {
             std::shared_ptr<link> firstNode;
             uint count = 0;
             uint componentCount = 0;
-            for(firstNode = graph->adjList.at(startNode); firstNode != NULL; firstNode = firstNode->next) {
+            for(firstNode = graph->adjList.at(startNode); firstNode != nullptr; firstNode = firstNode->next) {
 
                 if(graph->orderVector.at(firstNode->vert) == -1) {
 
@@ -378,15 +369,15 @@ class GraphAdtDirected {
 
         void FindKernelDag() {
 
-            auto maxElement = max_element(std::begin(graph->strongComponents), std::end(graph->strongComponents));
-            kernelDag = std::make_unique<DirectedGraph>(maxElement + 1);
+            auto maxElement = std::max_element(std::begin(graph->strongComponents), std::end(graph->strongComponents));
+            kernelDag = std::make_unique<DirectedGraph>(*maxElement + 1);
 
             for(int i = 0; i < graph->vertices; i++) {
 
                 std::shared_ptr<link> node;
-                for(node = graph->adjList.at(i)->next; node != NULL; node = node->next) {
+                for(node = graph->adjList.at(i)->next; node != nullptr; node = node->next) {
 
-                    kernelDag->adjMatrix.at(graph-strongComponents.at(i)).at(graph->strongComponents.at(node->vert)) = 1;
+                    kernelDag->adjMatrix.at(graph->strongComponents.at(i)).at(graph->strongComponents.at(node->vert)) = 1;
                 }
             }
         }        
