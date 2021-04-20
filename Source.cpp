@@ -5,6 +5,7 @@
 #include <vector>
 #include "GraphAdtUndirected.hpp"
 #include "GraphAdtDirected.hpp"
+#include "GraphAdtWeighted.hpp"
 
 #define SIZE 13
 
@@ -67,5 +68,12 @@ int main() {
     std::vector<int> strongComponents = graphDag.getStrongComponents();
     std::vector<int> reverseTopological = graphDag.getReverseTopological();
 
-    //OutputVector(strongComponents);
+    // ! make sure to reset the order vector and the position variable after using a property !
+    graphDag.ResetOrderVector();
+
+    OutputVector(strongComponents);
+
+    GraphAdtWeighted weightedgraph(8);
+
+    weightedgraph.AddEdge(0, 1, )
 }

@@ -16,6 +16,7 @@ class DirectedGraph: public Graph {
         std::vector<std::vector<uint>> dagTransitiveClosure;
         std::vector<std::vector<uint>> transitiveClosure;
         std::vector<int> topological;
+        std::vector<std::vector<int>> kernelDag;
 
         DirectedGraph(size_t numVert) : Graph(numVert) {
 

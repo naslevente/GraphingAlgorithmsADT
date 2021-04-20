@@ -7,6 +7,7 @@
 
 #ifndef GRAPHHEADER
 #define GRAPHHEADER
+
 class Graph {
 
     public:
