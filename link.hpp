@@ -14,6 +14,6 @@ class link {
         int vert;
         std::shared_ptr<link> next;
 
-        link(uint vertNum) : vert(vertNum) {}
+        link(int vertNum) : vert(vertNum) {}
 };
 #endif

@@ -12,8 +12,8 @@ class GraphAdtUndirected : GraphAdtInterface {
 
     private:
 
-        uint graphSize;
-        uint position = 1;
+        int graphSize;
+        int position = 1;
         std::unique_ptr<Graph> graph;
 
     public:

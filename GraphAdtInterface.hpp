@@ -13,8 +13,8 @@ class GraphAdtInterface {
 
     protected:
 
-        uint graphSize;
-        uint position = 0;
+        int graphSize;
+        int position = 0;
 
         std::vector<int> low;
 

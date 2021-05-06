@@ -13,12 +13,12 @@ class WeightedGraph {
     public:
 
         size_t vertices;
-        uint maxWeight = 0;
+        int maxWeight = 0;
 
         std::vector<std::shared_ptr<weightedlink>> adjList;
 
         std::vector<int> orderVector;
-        std::vector<std::vector<uint>> adjMatrix;
+        std::vector<std::vector<int>> adjMatrix;
         std::unique_ptr<Graph> minSpanningTree;
 
         WeightedGraph(size_t graphSize) {
@@ -26,7 +26,7 @@ class WeightedGraph {
             vertices = graphSize;
             orderVector = std::vector<int>(vertices, -1);
 
-            adjMatrix = std::vector<std::vector<uint>>(vertices, std::vector<uint>(vertices));
+            adjMatrix = std::vector<std::vector<int>>(vertices, std::vector<int>(vertices));
 
             for(int i = 0; i < vertices; ++i) {
 
@@ -42,7 +42,7 @@ class WeightedGraph {
 
         ~WeightedGraph() {}
 
-        bool AddLink(std::shared_ptr<weightedlink> node, uint nextNode, uint weight) {
+        bool AddLink(std::shared_ptr<weightedlink> node, int nextNode, int weight) {
 
             if(weight + 1 > maxWeight) {
 

@@ -15,8 +15,8 @@ class GraphAdtWeighted : GraphAdtInterface {
 
     private:
 
-        uint graphSize;
-        uint position = 0;
+        int graphSize;
+        int position = 0;
         std::unique_ptr<WeightedGraph> graph;
         std::vector<int> low;
 
@@ -38,7 +38,7 @@ class GraphAdtWeighted : GraphAdtInterface {
         }
 
         // Add edge from firstNode to secondNode to directed graph
-        bool AddToList(int firstNode, int secondNode, uint weight) {
+        bool AddToList(int firstNode, int secondNode, int weight) {
 
             // add edge to the graph
             std::shared_ptr<weightedlink> copyPointer = graph->adjList.at(firstNode);
@@ -59,7 +59,7 @@ class GraphAdtWeighted : GraphAdtInterface {
         }
 
         // Add edge from firstNode to secondNode including self cycles for adj matrix in a directed graph
-        bool AddToMatrix(int firstNode, int secondNode, uint weight) {
+        bool AddToMatrix(int firstNode, int secondNode, int weight) {
 
             // Assuming this edge has not already been added to the matrix and 
             // that the edge is being added to a directed graph
@@ -70,7 +70,7 @@ class GraphAdtWeighted : GraphAdtInterface {
         }
 
         // Getters and setters for the various member variables of the graph
-        std::vector<std::vector<uint>> getAdjacencyMatrix() {
+        std::vector<std::vector<int>> getAdjacencyMatrix() {
 
             return graph->adjMatrix;
         }
@@ -113,7 +113,7 @@ class GraphAdtWeighted : GraphAdtInterface {
             wt vector will hold the legnth of a parent link for a tree node and for a non tree node the distance to the MST !! */
         void GRAPHmstV() {
 
-            std::unique_ptr<Graph> minSpanningTree = std::make_unique<Graph>(graphSize)
+            std::unique_ptr<Graph> minSpanningTree = std::make_unique<Graph>(graphSize);
 
             std::vector<int> st = std::vector<int>(graphSize);
             std::vector<int> fr = std::vector<int>(graphSize);
@@ -146,7 +146,7 @@ class GraphAdtWeighted : GraphAdtInterface {
                     }
                 }
 
-                minSpanningTree->AddLink(st.at(min), min);
+                minSpanningTree->AddLink(min, st.at(min));
             }
 
             graph->minSpanningTree = std::move(minSpanningTree);
@@ -156,7 +156,7 @@ class GraphAdtWeighted : GraphAdtInterface {
         // PFS implementation uses a heap for priority-queue implementation
         void PFSPrims() {
 
-            std::unique_ptr<Graph> minSpanningTree = std::make_unique<Graph>(graphSize)
+            std::unique_ptr<Graph> minSpanningTree = std::make_unique<Graph>(graphSize);
 
             std::vector<int> st = std::vector<int>(graphSize);
             std::vector<int> fr = std::vector<int>(graphSize);
@@ -175,16 +175,27 @@ class GraphAdtWeighted : GraphAdtInterface {
             int node = 0;
             while(count != graph->vertices) {
 
-                std::unique_ptr<link> copyPointer = graph->adjList.at(node);
-                while(copyPointer != nullptr) {
+                for(int i = 0; i < graph->vertices; ++i) {
 
-                    copyPointer = copyPointer->next;
-                    fringe->addToHeap(copyPointer->vert);
+                    if(graph->adjMatrix.at(node).at(i) != 0) {
+
+                        fringe->AddToHeap(i, graph->adjMatrix.at(node).at(i));
+                    }
                 }
 
-                uint min = fringe->deleteMin();
-                minSpanningTree-AddLink(node, min);
-                node = min;
+                // extract the min weight
+                std::shared_ptr<heapElement> min = fringe->DeleteMin();
+                
+                // add to mst
+                std::shared_ptr<link> placeholder = minSpanningTree->adjList.at(node);
+                while(placeholder != nullptr) {
+
+                    placeholder = placeholder->next;
+                }
+                minSpanningTree->AddLink(min->destinationNode, placeholder);
+
+                node = min->destinationNode;
+                ++count;
             }
 
             /*
@@ -214,5 +225,11 @@ class GraphAdtWeighted : GraphAdtInterface {
             */
 
             graph->minSpanningTree = std::move(minSpanningTree);
+        }
+
+        // !! Kruskals algorithm to computing the MST of a graph
+        void Kruskals() {
+
+
         }
 };

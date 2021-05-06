@@ -14,8 +14,8 @@ class GraphAdtDirected : public GraphAdtInterface {
 
     private:
 
-        uint graphSize;
-        uint position = 0;
+        int graphSize;
+        int position = 0;
         std::unique_ptr<DirectedGraph> graph;
         std::unique_ptr<DirectedGraph> kernelDag;
 
@@ -57,12 +57,12 @@ class GraphAdtDirected : public GraphAdtInterface {
         ~GraphAdtDirected() {}
 
         // Getters and setters for the various member variables of the graph
-        std::vector<std::vector<uint>> getAdjacencyMatrix() {
+        std::vector<std::vector<int>> getAdjacencyMatrix() {
 
             return graph->adjMatrix;
         }
 
-        std::vector<std::vector<uint>> getTransitiveClosure() {
+        std::vector<std::vector<int>> getTransitiveClosure() {
 
             return graph->transitiveClosure;
         }
@@ -356,8 +356,8 @@ class GraphAdtDirected : public GraphAdtInterface {
         void Tarjans(int startNode) {
 
             std::shared_ptr<link> firstNode;
-            uint count = 0;
-            uint componentCount = 0;
+            int count = 0;
+            int componentCount = 0;
             for(firstNode = graph->adjList.at(startNode); firstNode != nullptr; firstNode = firstNode->next) {
 
                 if(graph->orderVector.at(firstNode->vert) == -1) {

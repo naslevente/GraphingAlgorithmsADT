@@ -17,7 +17,7 @@ class Graph {
 
         // count/order of the nodes from a dfs
         std::vector<int> orderVector;
-        std::vector<std::vector<uint>> adjMatrix;
+        std::vector<std::vector<int>> adjMatrix;
         // size of the matrix
         size_t vertices;
 
@@ -27,7 +27,7 @@ class Graph {
 
             // Define the size for the order and adjMatrix vector
             orderVector = std::vector<int>(vertices, -1);
-            adjMatrix = std::vector<std::vector<uint>>(vertices, std::vector<uint>(vertices));
+            adjMatrix = std::vector<std::vector<int>>(vertices, std::vector<int>(vertices));
 
             for(int i = 0; i < vertices; i++) {
 

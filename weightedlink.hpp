@@ -16,7 +16,7 @@ class weightedlink {
         int vert;
         std::shared_ptr<weightedlink> next;
 
-        weightedlink(uint vertNum) : vert(vertNum) {}
+        weightedlink(int vertNum) : vert(vertNum) {}
 };
 
 #endif

@@ -10,7 +10,7 @@
 #define SIZE 13
 
 // Display functions
-void OutputMatrix(std::vector<std::vector<uint>> inputMatrix) {
+void OutputMatrix(std::vector<std::vector<int>> inputMatrix) {
 
     for(int i = 0; i < SIZE; i++) {
 
@@ -60,7 +60,7 @@ int main() {
     graphDag.AddEdge(11, 12);
     graphDag.AddEdge(12, 9);
 
-    std::vector<std::vector<uint>> adjMatrix = graphDag.getAdjacencyMatrix();
+    std::vector<std::vector<int>> adjMatrix = graphDag.getAdjacencyMatrix();
 
     //graphDag.StartTopological(0);
     //std::vector<int> topological = graphDag.Kosarajus(0);
@@ -73,7 +73,7 @@ int main() {
 
     OutputVector(strongComponents);
 
-    GraphAdtWeighted weightedgraph(8);
+    //GraphAdtWeighted weightedgraph(8);
 
-    weightedgraph.AddEdge(0, 1, )
+    //weightedgraph.AddEdge(0, 1, )
 }

@@ -13,8 +13,8 @@ class DirectedGraph: public Graph {
 
         std::vector<int> reverseTopological;
         std::vector<int> strongComponents;
-        std::vector<std::vector<uint>> dagTransitiveClosure;
-        std::vector<std::vector<uint>> transitiveClosure;
+        std::vector<std::vector<int>> dagTransitiveClosure;
+        std::vector<std::vector<int>> transitiveClosure;
         std::vector<int> topological;
         std::vector<std::vector<int>> kernelDag;
 
@@ -24,8 +24,8 @@ class DirectedGraph: public Graph {
             reverseTopological = std::vector<int>(vertices, -1);
             topological = std::vector<int>(vertices, -1);
             strongComponents = std::vector<int>(vertices, -1);
-            transitiveClosure = std::vector<std::vector<uint>>(vertices, std::vector<uint>(vertices));
-            dagTransitiveClosure = std::vector<std::vector<uint>>(vertices, std::vector<uint>(vertices));
+            transitiveClosure = std::vector<std::vector<int>>(vertices, std::vector<int>(vertices));
+            dagTransitiveClosure = std::vector<std::vector<int>>(vertices, std::vector<int>(vertices));
 
             for(int i = 0; i < vertices; i++) {
 
@@ -37,7 +37,7 @@ class DirectedGraph: public Graph {
 
         ~DirectedGraph() {}
 
-        void setTransitiveClosure(std::vector<std::vector<uint>> inputMatrix) {
+        void setTransitiveClosure(std::vector<std::vector<int>> inputMatrix) {
 
             transitiveClosure = std::move(inputMatrix);
         }
