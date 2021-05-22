@@ -17,19 +17,6 @@ class GraphAdtInterface {
         int position = 0;
 
         std::vector<int> low;
-
-    public:
-
-        virtual bool AddToList(int, int) = 0;
-        virtual bool AddToMatrix(int, int) = 0;
-
-        void AddEdge(int firstNode, int secondNode) {
-
-            if(!AddToList(firstNode, secondNode) || !AddToMatrix(firstNode, secondNode)) {
-
-                std::cout << "failed to add the edge to the graph" << std::endl;
-            }
-        }
 };
 
 #endif

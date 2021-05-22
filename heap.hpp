@@ -9,6 +9,7 @@
 
 #ifndef HEAPHEADER
 #define HEAPHEADER
+
 class heap {
 
     public:
@@ -22,53 +23,65 @@ class heap {
             this->heapSize = heapSize;
         }
 
-        void AddToHeap(int node, int weight) {
+        void AddToHeap(int node, int destinationNode, int weight) {
 
             // create a unique pointer pointing to a new heapElement
-            std::shared_ptr newHeapElement = std::make_shared<heapElement>(node, weight);
+            std::shared_ptr<heapElement> newHeapElement = std::make_shared<heapElement>(destinationNode, node, weight);
 
             fringeHeap.push_back(newHeapElement);
             BottomUpHeapify();
             ++heapSize;
         }
 
+        std::vector<std::shared_ptr<heapElement>> getHeap() {
+
+            return fringeHeap;
+        }
 
         // !! both heapifies run in log(n) time
         void BottomUpHeapify() {
 
-            int index = fringeHeap.size() + 1;
-            while(fringeHeap.at(index)->weight < fringeHeap.at(index / 2)->weight) {
+            int index = fringeHeap.size() - 1;
+            if(index != 0) {
 
-                std::shared_ptr placeholder = fringeHeap.at(index - 1);
-                fringeHeap.at(index - 1) = fringeHeap.at((index / 2) - 1);
-                fringeHeap.at((index / 2) - 1) = placeholder;
+                while(index != 0 && fringeHeap.at(index)->weight < fringeHeap.at(((index + 1) / 2) - 1)->weight) {
+
+                    std::shared_ptr<heapElement> placeholder = fringeHeap.at(index);
+                    fringeHeap.at(index) = fringeHeap.at(((index + 1) / 2) - 1);
+                    fringeHeap.at(((index + 1) / 2) - 1) = placeholder;
+
+                    index = ((index + 1) / 2) - 1;
+                }
             }
         }
 
         void TopDownHeapify() {
 
-            int index = 1;
-            while(fringeHeap.at(index - 1)->weight > fringeHeap.at(index * 2)->weight || 
-                fringeHeap.at(index - 1)->weight > fringeHeap.at((index * 2) + 1)->weight) {
+            if(heapSize != 0) {
 
-                if(fringeHeap.at(index * 2)->weight > fringeHeap.at((index * 2) + 1)->weight) {
+                int index = 0;
+                while(fringeHeap.at(index)->weight > fringeHeap.at(((index + 1) * 2) - 1)->weight || 
+                    fringeHeap.at(index)->weight > fringeHeap.at((index + 1) * 2)->weight) {
 
-                    std::shared_ptr placeholder = fringeHeap.at(index - 1);
-                    fringeHeap.at(index - 1) = fringeHeap.at((index * 2) + 1);
-                    fringeHeap.at((index * 2) + 1) = placeholder;
-                }
-                else {
+                    if(fringeHeap.at(((index + 1) * 2) - 1)->weight > fringeHeap.at((index + 1) * 2)->weight) {
 
-                    std::shared_ptr placeholder = fringeHeap.at(index - 1);
-                    fringeHeap.at(index - 1) = fringeHeap.at(index * 2);
-                    fringeHeap.at(index * 2) = placeholder;
+                        std::shared_ptr<heapElement> placeholder = fringeHeap.at(index);
+                        fringeHeap.at(index) = fringeHeap.at((((index + 1) * 2) - 1) + 1);
+                        fringeHeap.at((index + 1) * 2) = placeholder;
+                    }
+                    else {
+
+                        std::shared_ptr<heapElement> placeholder = fringeHeap.at(index);
+                        fringeHeap.at(index) = fringeHeap.at(((index + 1) * 2) - 1);
+                        fringeHeap.at(((index + 1) * 2) - 1) = placeholder;
+                    }
                 }
             }
         }
 
         std::shared_ptr<heapElement> DeleteMin() {
 
-            std::shared_ptr min = fringeHeap.at(0);
+            std::shared_ptr<heapElement> min = fringeHeap.at(0);
 
             // implement pop_front method for vector
             for(int i = 1; i < fringeHeap.size() - 1; i++) {
@@ -79,8 +92,8 @@ class heap {
             fringeHeap.pop_back();
 
             // heapify to restore heap properties
-            TopDownHeapify();
             --heapSize;
+            TopDownHeapify();
 
             return min;
         }

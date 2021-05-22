@@ -19,7 +19,7 @@ class WeightedGraph {
 
         std::vector<int> orderVector;
         std::vector<std::vector<int>> adjMatrix;
-        std::unique_ptr<Graph> minSpanningTree;
+        std::vector<int> minSpanningTree;
 
         WeightedGraph(size_t graphSize) {
 

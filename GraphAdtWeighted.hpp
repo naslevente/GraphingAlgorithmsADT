@@ -4,6 +4,7 @@
 #include <memory>
 #include <ostream>
 #include <stack>
+#include <queue>
 
 #include <vector>
 #include "WeightedGraph.hpp"
@@ -64,7 +65,9 @@ class GraphAdtWeighted : GraphAdtInterface {
             // Assuming this edge has not already been added to the matrix and 
             // that the edge is being added to a directed graph
             graph->adjMatrix.at(firstNode).at(secondNode) = weight;
-            graph->adjMatrix.at(firstNode).at(firstNode) = weight;
+            
+            // removing self loops
+            //graph->adjMatrix.at(firstNode).at(firstNode) = weight;
 
             return true;
         }
@@ -75,37 +78,9 @@ class GraphAdtWeighted : GraphAdtInterface {
             return graph->adjMatrix;
         }
 
-        // algorithms to find the mst of a graph
-        void Prims() {
+        std::vector<int> getMst() {
 
-            std::vector<int> min = std::vector<int>(graphSize);
-            std::vector<int> mst = std::vector<int>(graphSize);
-
-            for(int i = 0; i < graphSize; i++) {
-
-                min.at(i) = graph->maxWeight;
-                mst.at(i) = -1;
-            }
-
-            for(int i = 0; i != graphSize - 1; ) {
-
-                if(mst.at(i) == -1) {
-
-                    for(int x = 0; x < graphSize; x++) {
-
-                        if(mst.at(x) == -1) {
-
-                            if(graph->adjMatrix.at(i).at(x) < min.at(i)) {
-
-                                min.at(i) = graph->adjMatrix.at(i).at(x);
-                                mst.at(i) = x;
-                            }
-                        }
-                    }
-
-                    i = mst.at(i);
-                }
-            }
+            return graph->minSpanningTree;
         }
 
         /* !! st vector will hold the parent node of a tree node in the MST 
@@ -133,7 +108,8 @@ class GraphAdtWeighted : GraphAdtInterface {
 
                     if(st.at(w) == -1) {
 
-                        if(graph->adjMatrix.at(v).at(w) < wt.at(w)) {
+                        if((graph->adjMatrix.at(v).at(w) != 0) && graph->adjMatrix.at(v).at(w) 
+                            < wt.at(w)) {
 
                             wt.at(w) = graph->adjMatrix.at(v).at(w);
                             fr.at(w) = v;
@@ -145,86 +121,62 @@ class GraphAdtWeighted : GraphAdtInterface {
                         }
                     }
                 }
-
-                minSpanningTree->AddLink(min, st.at(min));
             }
 
-            graph->minSpanningTree = std::move(minSpanningTree);
+            graph->minSpanningTree = st;
         }
 
         // PFS implementation of prim's algorithm, improves running time to ElgV
-        // PFS implementation uses a heap for priority-queue implementation
+        // PFS implementation uses a heap for fringe management
         void PFSPrims() {
-
-            std::unique_ptr<Graph> minSpanningTree = std::make_unique<Graph>(graphSize);
 
             std::vector<int> st = std::vector<int>(graphSize);
             std::vector<int> fr = std::vector<int>(graphSize);
             std::vector<int> wt = std::vector<int>(graphSize + 1);
 
+            // keeps track of the nodes that have been visited
+            std::queue<int>* countQueuePtr;
+            std::queue<int> countQueue = std::queue<int>();
+            countQueuePtr = &countQueue;
+
             int v, w, min;
             for(v = 0; v < graphSize; v++) {
 
                 st.at(v) = -1; fr.at(v) = v; wt.at(v) = graph->maxWeight;
+                countQueuePtr->push(v);
             }
 
             // create the "fringe" that will hold all non tree edges
-            std::shared_ptr<heap> fringe;
+            std::shared_ptr<heap> fringe = std::make_shared<heap>(0);
             int count = 0;
 
-            int node = 0;
-            while(count != graph->vertices) {
+            // start with 0th node with a weight of negative one since it is the parent
+            fringe->AddToHeap(-1, 0, -1);
 
-                for(int i = 0; i < graph->vertices; ++i) {
+            while(!countQueuePtr->empty()) {
 
-                    if(graph->adjMatrix.at(node).at(i) != 0) {
+                std::shared_ptr<heapElement> min  = fringe->DeleteMin();
+                if(min->originNode == -1) {
 
-                        fringe->AddToHeap(i, graph->adjMatrix.at(node).at(i));
+                    st.at(min->destinationNode) = 0;
+                    countQueuePtr->pop();
+                }
+                else {
+
+                    st.at(min->destinationNode) = min->originNode;
+                    countQueuePtr->pop();
+                }
+
+                for(int i = 0; i < graphSize; ++i) {
+
+                    if(graph->adjMatrix.at(min->destinationNode).at(i) != 0 && st.at(i) == -1) {
+
+                        fringe->AddToHeap(min->destinationNode, i, graph->adjMatrix.at(min->destinationNode).at(i));
                     }
                 }
-
-                // extract the min weight
-                std::shared_ptr<heapElement> min = fringe->DeleteMin();
-                
-                // add to mst
-                std::shared_ptr<link> placeholder = minSpanningTree->adjList.at(node);
-                while(placeholder != nullptr) {
-
-                    placeholder = placeholder->next;
-                }
-                minSpanningTree->AddLink(min->destinationNode, placeholder);
-
-                node = min->destinationNode;
-                ++count;
             }
 
-            /*
-            st.at(0) = 0; wt.at(graphSize) = graph->maxWeight;
-            for(min = 0; min != graphSize; ) {
-
-                v = min; st.at(min) = fr.at(min);
-                for(w = 0, min = graphSize; w < graphSize; w++) {
-
-                    if(st.at(w) == -1) {
-
-                        if(graph->adjMatrix.at(v).at(w) < wt.at(w)) {
-
-                            wt.at(w) = graph->adjMatrix.at(v).at(w);
-                            fr.at(w) = v;
-                        }
-
-                        if(wt.at(w) < wt.at(min)) {
-
-                            min = w;
-                        }
-                    }
-                }
-
-                minSpanningTree->AddLink(st.at(min), min);
-            }
-            */
-
-            graph->minSpanningTree = std::move(minSpanningTree);
+            graph->minSpanningTree = st;
         }
 
         // !! Kruskals algorithm to computing the MST of a graph
