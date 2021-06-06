@@ -12,6 +12,8 @@
 #include "weightedlink.hpp"
 #include "heap.hpp"
 
+typedef heapElement* ElementPointer;
+
 class GraphAdtWeighted : GraphAdtInterface {
 
     private:
@@ -19,13 +21,16 @@ class GraphAdtWeighted : GraphAdtInterface {
         int graphSize;
         int position = 0;
         std::unique_ptr<WeightedGraph> graph;
+        std::unique_ptr<WeightedGraph> minSpanningTree;
         std::vector<int> low;
+        std::vector<ElementPointer> weights;
 
     public:
 
         GraphAdtWeighted(size_t numVert) {
 
             graph = std::make_unique<WeightedGraph>(numVert);
+            minSpanningTree = std::make_unique<WeightedGraph>(numVert);
             graphSize = numVert;
             low = std::vector<int>(numVert);
         }
@@ -65,9 +70,12 @@ class GraphAdtWeighted : GraphAdtInterface {
             // Assuming this edge has not already been added to the matrix and 
             // that the edge is being added to a directed graph
             graph->adjMatrix.at(firstNode).at(secondNode) = weight;
-            
-            // removing self loops
-            //graph->adjMatrix.at(firstNode).at(firstNode) = weight;
+            graph->adjMatrix.at(secondNode).at(firstNode) = weight;
+
+            // add weight to weights vector
+            //heapElement newElement = heapElement(secondNode, firstNode, weight);
+            ElementPointer newElementPointer = new heapElement(secondNode, firstNode, weight);
+            weights.push_back(newElementPointer);
 
             return true;
         }
@@ -81,6 +89,11 @@ class GraphAdtWeighted : GraphAdtInterface {
         std::vector<int> getMst() {
 
             return graph->minSpanningTree;
+        }
+
+        std::vector<std::vector<int>> getMstMatrix() {
+
+            return minSpanningTree->adjMatrix;
         }
 
         /* !! st vector will hold the parent node of a tree node in the MST 
@@ -179,9 +192,121 @@ class GraphAdtWeighted : GraphAdtInterface {
             graph->minSpanningTree = st;
         }
 
-        // !! Kruskals algorithm to computing the MST of a graph
+        // !! necessary functions for kruskals algorithm
+
+        // sort the weights of the graph
+        void SortWeights() {
+
+            std::vector<ElementPointer> newWeights = std::vector<ElementPointer>();
+            for(int i = 0; i < weights.size(); ++i) {
+
+                ElementPointer currentPointer = weights.at(i);
+
+                int index = 0;
+                for(int k = 0; k < newWeights.size(); ++k) {
+
+                    if(!(currentPointer->weight > newWeights.at(k)->weight)) {
+
+                        index = k;
+                        break;
+                    }
+                    else {
+
+                        index = k + 1;
+                    }
+                }
+
+                auto iterator = newWeights.begin();
+                newWeights.insert((iterator + index), 1, currentPointer);
+            }
+
+            weights = newWeights;
+        }
+
+        bool DepthFirstSearchMatrix(int node, int destinationNode, std::vector<int> tracker) {
+
+            tracker.at(node) = -1;
+
+            bool isCycle = false;
+            for(int i = 0; i < graphSize; ++i) {
+
+                //if(minSpanningTree->adjMatrix.at(node).at(i) != 0 || minSpanningTree->adjMatrix.at(i).at(node) != 0) {
+                if(minSpanningTree->adjMatrix.at(node).at(i) != 0 && tracker.at(i) != -1) {
+
+                    if(i == destinationNode) {
+
+                        return true;
+                    }
+                    else {
+
+                        isCycle = DepthFirstSearchMatrix(i, destinationNode, tracker);
+                    }
+                }
+
+                if(isCycle) {
+
+                    return true;
+                }
+            }
+
+            if(isCycle) {
+
+                return true;
+            }
+            else {
+
+                return false;
+            }
+        }
+
+        // checks if the edge being added creates a cycle in the mst
+        bool CheckIfCycle(ElementPointer inputEdge) {
+
+            if(inputEdge->originNode == 0 && inputEdge->destinationNode == 5) {
+
+
+            }
+
+            std::vector<int> tracker = std::vector<int>(graphSize, 0);
+            if(DepthFirstSearchMatrix(inputEdge->originNode, inputEdge->destinationNode, tracker)) {
+
+                return true;
+            }
+            else {
+
+                return false;
+            }
+        }
+
+        // !! Kruskals algorithm to computing the MST of a graph (adj matrix representation)
         void Kruskals() {
 
+            for(int i = 0; i < graph->adjMatrix.size(); ++i) {
 
+                for(int j = 0; j < graph->adjMatrix.at(0).size(); ++j) {
+
+                    std::cout << graph->adjMatrix.at(i).at(j) << " ";
+                }
+
+                std::cout << "\n";
+            }
+
+            SortWeights();
+            for(int i = 0; i < weights.size(); ++i) {
+
+                ElementPointer currentElement = weights.at(i);
+                std::cout << "origin node of current edge: " << currentElement->originNode << std::endl;
+                std::cout << "destination node of current edge: " << currentElement->destinationNode << std::endl;
+                std::cout << "weight of current edge: " << currentElement->weight << std::endl;
+
+                if(!CheckIfCycle(currentElement)) {
+
+                    minSpanningTree->adjMatrix.at(currentElement->originNode).at(currentElement->destinationNode) 
+                        = currentElement->weight;
+                    minSpanningTree->adjMatrix.at(currentElement->destinationNode).at(currentElement->originNode) 
+                        = currentElement->weight;
+                    std::cout << "added to the mst" << std::endl;
+                }
+            }
         }
 };

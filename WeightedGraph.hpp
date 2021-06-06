@@ -33,9 +33,9 @@ class WeightedGraph {
                 std::shared_ptr<weightedlink> newLink = std::make_shared<weightedlink>(i);
                 adjList.push_back(newLink);
 
-                for(int k = 0; k < vertices; k++) {
+                for(int k = 0; k < vertices; ++k) {
 
-                    adjMatrix.at(i).push_back(0);
+                    adjMatrix.at(i).at(k) = 0;
                 }
             }
         }

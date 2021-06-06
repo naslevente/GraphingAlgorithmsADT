@@ -39,18 +39,18 @@ int main() {
 
     GraphAdtWeighted graphDag(SIZE);
 
-    graphDag.AddEdge(0, 2, 3);
-    graphDag.AddEdge(0, 7, 5);
+    graphDag.AddEdge(0, 2, 7);
+    graphDag.AddEdge(0, 7, 8);
     graphDag.AddEdge(0, 6, 15);
-    graphDag.AddEdge(0, 1, 16);
+    graphDag.AddEdge(0, 1, 9);
     graphDag.AddEdge(0, 5, 17);
-    graphDag.AddEdge(7, 1, 6);
-    graphDag.AddEdge(7, 6, 7);
-    graphDag.AddEdge(7, 4, 8);
-    graphDag.AddEdge(4, 3, 9);
+    graphDag.AddEdge(7, 1, 5);
+    graphDag.AddEdge(7, 6, 6);
+    graphDag.AddEdge(7, 4, 12);
+    graphDag.AddEdge(4, 3, 10);
     graphDag.AddEdge(4, 5, 11);
-    graphDag.AddEdge(3, 5, 10);
-    graphDag.AddEdge(6, 4, 12);
+    graphDag.AddEdge(3, 5, 3);
+    graphDag.AddEdge(6, 4, 15);
 
     /*
     // test the heap structure
@@ -75,14 +75,26 @@ int main() {
     }
     */
 
-    graphDag.PFSPrims();
-    std::vector<int> mst = graphDag.getMst();
+    graphDag.Kruskals();
+    std::vector<std::vector<int>> mst = graphDag.getMstMatrix();
 
+    for(int i = 0; i < mst.size(); ++i) {
+
+        for(int j = 0; j < mst.at(0).size(); ++j) {
+
+            std::cout << mst.at(i).at(j) << " ";
+        }
+
+        std::cout << "\n";
+    }
+
+    /*
     for(int i = 0; i < mst.size(); ++i) {
 
         std::cout << mst.at(i);
     }
     std::cout << std::endl;
+    */
 
     /*
     //graphDag.StartTopological(0);
