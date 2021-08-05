@@ -21,10 +21,16 @@ class WeightedGraph {
         std::vector<std::vector<int>> adjMatrix;
         std::vector<int> minSpanningTree;
 
+        // for any msts being calculated with weighted graph object
+        std::vector<int> unionFind;
+
+        std::vector<int> parentSize;
+
         WeightedGraph(size_t graphSize) {
 
             vertices = graphSize;
             orderVector = std::vector<int>(vertices, -1);
+            parentSize = std::vector<int>(graphSize, 1);
 
             adjMatrix = std::vector<std::vector<int>>(vertices, std::vector<int>(vertices));
 
@@ -32,6 +38,8 @@ class WeightedGraph {
 
                 std::shared_ptr<weightedlink> newLink = std::make_shared<weightedlink>(i);
                 adjList.push_back(newLink);
+
+                unionFind.push_back(i);
 
                 for(int k = 0; k < vertices; ++k) {
 

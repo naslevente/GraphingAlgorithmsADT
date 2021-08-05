@@ -5,6 +5,7 @@
 #include <ostream>
 #include <stack>
 #include <queue>
+#include <time.h>
 
 #include <vector>
 #include "WeightedGraph.hpp"
@@ -33,6 +34,9 @@ class GraphAdtWeighted : GraphAdtInterface {
             minSpanningTree = std::make_unique<WeightedGraph>(numVert);
             graphSize = numVert;
             low = std::vector<int>(numVert);
+
+            // set the seed for random to time
+            srand(time(0));
         }
 
         void AddEdge(int firstNode, int secondNode, int weight) {
@@ -80,6 +84,44 @@ class GraphAdtWeighted : GraphAdtInterface {
             return true;
         }
 
+        // update union find method each time new connection is made between two nodes
+        void UpdateUnionFind(int firstNode, int secondNode) {
+
+            int i, j;
+            for(i = firstNode; i != graph->unionFind.at(i); i = graph->unionFind.at(i));
+            for(j = secondNode; j != graph->unionFind.at(j); j = graph->unionFind.at(j));
+
+            if(i != j) {
+
+                if(graph->parentSize.at(i) < graph->parentSize.at(j)) {
+
+                    for(int k = 0; k < graph->unionFind.size(); ++k) {
+
+                        // update each node whose parent is i
+                        if(graph->unionFind.at(k) == i || graph->unionFind.at(k) == j) {
+
+                            graph->unionFind.at(k) = j;
+
+                            // update parent size
+                            graph->parentSize.at(k) = graph->parentSize.at(j) + graph->parentSize.at(i);
+                        }   
+                    }
+                }
+                else {
+
+                    for(int k = 0; k < graph->unionFind.size(); ++k) {
+
+                        // update each node whose parent is j
+                        if(graph->unionFind.at(k) == i || graph->unionFind.at(k) == j) {
+
+                            graph->unionFind.at(k) = i;
+                            graph->parentSize.at(k) = graph->parentSize.at(j) + graph->parentSize.at(i);
+                        }
+                    }
+                }
+            }
+        }
+
         // Getters and setters for the various member variables of the graph
         std::vector<std::vector<int>> getAdjacencyMatrix() {
 
@@ -94,6 +136,11 @@ class GraphAdtWeighted : GraphAdtInterface {
         std::vector<std::vector<int>> getMstMatrix() {
 
             return minSpanningTree->adjMatrix;
+        }
+
+        std::vector<int> getUnionFind() {
+
+            return graph->unionFind;
         }
 
         /* !! st vector will hold the parent node of a tree node in the MST 
@@ -190,9 +237,33 @@ class GraphAdtWeighted : GraphAdtInterface {
             }
 
             graph->minSpanningTree = st;
+
+            // delete pointers
+            delete countQueuePtr;
         }
 
         // !! necessary functions for kruskals algorithm
+
+        // union-find algorithm to solve connectivity problem
+        bool UnionFind(ElementPointer inputEdge) {
+
+            int firstNode = inputEdge->originNode;
+            int secondNode = inputEdge->destinationNode;
+
+            int i, j;
+
+            for(i = firstNode; i != graph->unionFind.at(i); i = graph->unionFind.at(i));
+            for(j = secondNode; j != graph->unionFind.at(j); j = graph->unionFind.at(j));
+
+            if(i == j) {
+
+                return true;
+            }
+            else {
+
+                return false;
+            }
+        }
 
         // sort the weights of the graph
         void SortWeights() {
@@ -259,26 +330,9 @@ class GraphAdtWeighted : GraphAdtInterface {
             }
         }
 
-        // checks if the edge being added creates a cycle in the mst
-        bool CheckIfCycle(ElementPointer inputEdge) {
-
-            if(inputEdge->originNode == 0 && inputEdge->destinationNode == 5) {
-
-
-            }
-
-            std::vector<int> tracker = std::vector<int>(graphSize, 0);
-            if(DepthFirstSearchMatrix(inputEdge->originNode, inputEdge->destinationNode, tracker)) {
-
-                return true;
-            }
-            else {
-
-                return false;
-            }
-        }
-
-        // !! Kruskals algorithm to computing the MST of a graph (adj matrix representation)
+        // !! Kruskals algorithm for computing the MST of a graph (adj matrix representation) !!
+        // if uinion-find with halving is used to find the connectivity between two vertices in the mst
+        // sorting dominates the running time, making the total running at best E log E
         void Kruskals() {
 
             for(int i = 0; i < graph->adjMatrix.size(); ++i) {
@@ -291,7 +345,12 @@ class GraphAdtWeighted : GraphAdtInterface {
                 std::cout << "\n";
             }
 
+            // reset vector based array
+            graph->orderVector = std::vector<int>(graph->vertices, -1);
+
+            // sort weights with whatever sorting algorithm
             SortWeights();
+
             for(int i = 0; i < weights.size(); ++i) {
 
                 ElementPointer currentElement = weights.at(i);
@@ -299,13 +358,16 @@ class GraphAdtWeighted : GraphAdtInterface {
                 std::cout << "destination node of current edge: " << currentElement->destinationNode << std::endl;
                 std::cout << "weight of current edge: " << currentElement->weight << std::endl;
 
-                if(!CheckIfCycle(currentElement)) {
+                if(!UnionFind(currentElement)) {
 
                     minSpanningTree->adjMatrix.at(currentElement->originNode).at(currentElement->destinationNode) 
                         = currentElement->weight;
                     minSpanningTree->adjMatrix.at(currentElement->destinationNode).at(currentElement->originNode) 
                         = currentElement->weight;
                     std::cout << "added to the mst" << std::endl;
+
+                    // update union find
+                    UpdateUnionFind(currentElement->originNode, currentElement->destinationNode);
                 }
             }
         }
