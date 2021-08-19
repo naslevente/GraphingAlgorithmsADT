@@ -122,6 +122,22 @@ class GraphAdtWeighted : GraphAdtInterface {
             }
         }
 
+        // add edge to mst
+        void AddToMST(ElementPointer currentElement) {
+
+            if(!UnionFind(currentElement)) {
+
+                minSpanningTree->adjMatrix.at(currentElement->originNode).at(currentElement->destinationNode) 
+                    = currentElement->weight;
+                minSpanningTree->adjMatrix.at(currentElement->destinationNode).at(currentElement->originNode) 
+                    = currentElement->weight;
+                std::cout << "added to the mst" << std::endl;
+
+                // update union find
+                UpdateUnionFind(currentElement->originNode, currentElement->destinationNode);
+            }
+        }
+
         // Getters and setters for the various member variables of the graph
         std::vector<std::vector<int>> getAdjacencyMatrix() {
 
@@ -294,6 +310,70 @@ class GraphAdtWeighted : GraphAdtInterface {
             weights = newWeights;
         }
 
+        // quicksort implementation for modified kruskals algorithm
+        // at each recursive call, edges less than the partition are checked and
+        // added to MST. After each recursive call, there's a check to see if
+        // v-1 edges have been added to the mst
+        void QuickSort(int startIndex, int endIndex) {
+
+            if(endIndex - startIndex == 1) { // reached end of recursive call
+
+                // check to see if start index or end index weight is larger
+                ElementPointer currentElementAtStart = weights.at(startIndex);
+                ElementPointer currentElementAtEnd = weights.at(endIndex);
+                if(currentElementAtStart->weight > currentElementAtEnd->weight) {
+
+                    // add only the lesser edge
+                    // TODO: add check if MST is complete (if not, add other edge too)
+                    AddToMST(currentElementAtEnd);
+                }
+                else {
+
+                    AddToMST(currentElementAtStart);
+                }
+
+                return;
+            }
+
+            // pick an efficient partition
+            int partitionIndex = (startIndex + endIndex) / 2;
+            ElementPointer partitionElement = weights.at(partitionIndex);
+
+            // create vector for the sorted weights
+            std::vector<int> sortedVector = std::vector<int>(0, weights.size());
+
+            int rightIndex = endIndex;
+            int leftIndex = 0;
+
+            // place weights into correct position
+            for(int i = 0; i < endIndex; ++i) {
+
+                ElementPointer currentElement = weights.at(i);
+
+                // TODO: make case for equal weight
+                if(currentElement->weight < partitionElement->weight) {
+
+                    sortedVector.at(leftIndex) = currentElement->weight;
+                }
+                else {
+
+                    sortedVector.at(rightIndex) = currentElement->weight;
+                }
+
+                delete currentElement;
+            }
+
+            // delete pointers and move contents of sortedVector to weights
+            delete partitionElement;
+            // TODO: replace non-sorted parts of the original vector with newly sorted parts
+            //weights = std::move(sortedVector);
+
+            // initiate next recursive calls
+            int newPartitionIndex = partitionIndex / 2;
+            QuickSort(0, newPartitionIndex);
+            QuickSort(newPartitionIndex, partitionIndex);
+        }
+
         bool DepthFirstSearchMatrix(int node, int destinationNode, std::vector<int> tracker) {
 
             tracker.at(node) = -1;
@@ -370,5 +450,11 @@ class GraphAdtWeighted : GraphAdtInterface {
                     UpdateUnionFind(currentElement->originNode, currentElement->destinationNode);
                 }
             }
+        }
+
+        // kruskals algorithm with quick sort implementation to only sort as many edges that are needed
+        void ModifiedKruskals() {
+
+
         }
 };
