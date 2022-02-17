@@ -120,12 +120,23 @@ class GraphAdtWeighted : GraphAdtInterface {
                     }
                 }
             }
+
+            graph->mstCompletion.pop();
+        }
+
+        // union find operation (returns parent of input node)
+        int UnionFind(int node) {
+
+            int i;
+            for(i = node; i != graph->unionFind.at(i); i = graph->unionFind.at(i));
+
+            return i;
         }
 
         // add edge to mst
         void AddToMST(ElementPointer currentElement) {
 
-            if(!UnionFind(currentElement)) {
+            if(!UnionCycle(currentElement)) {
 
                 minSpanningTree->adjMatrix.at(currentElement->originNode).at(currentElement->destinationNode) 
                     = currentElement->weight;
@@ -210,58 +221,61 @@ class GraphAdtWeighted : GraphAdtInterface {
             std::vector<int> fr = std::vector<int>(graphSize);
             std::vector<int> wt = std::vector<int>(graphSize + 1);
 
-            // keeps track of the nodes that have been visited
-            std::queue<int>* countQueuePtr;
-            std::queue<int> countQueue = std::queue<int>();
-            countQueuePtr = &countQueue;
-
             int v, w, min;
             for(v = 0; v < graphSize; v++) {
 
                 st.at(v) = -1; fr.at(v) = v; wt.at(v) = graph->maxWeight;
-                countQueuePtr->push(v);
             }
 
             // create the "fringe" that will hold all non tree edges
-            std::shared_ptr<heap> fringe = std::make_shared<heap>(0);
+            heap *fringe = new heap(0);
             int count = 0;
 
             // start with 0th node with a weight of negative one since it is the parent
             fringe->AddToHeap(-1, 0, -1);
 
-            while(!countQueuePtr->empty()) {
+            // each step requires lgV + MlgV where M * number of steps is E (the number of edges)
+            while(fringe->heapSize != 0) {
 
                 std::shared_ptr<heapElement> min  = fringe->DeleteMin();
+                st.at(min->destinationNode) = fr.at(min->destinationNode);
                 if(min->originNode == -1) {
 
                     st.at(min->destinationNode) = 0;
-                    countQueuePtr->pop();
                 }
                 else {
 
                     st.at(min->destinationNode) = min->originNode;
-                    countQueuePtr->pop();
                 }
 
+                // TODO: finish writing FindAndUpdateHeapElement in heap class
+                // runs E times total for adjacency list represenation
                 for(int i = 0; i < graphSize; ++i) {
 
                     if(graph->adjMatrix.at(min->destinationNode).at(i) != 0 && st.at(i) == -1) {
 
                         fringe->AddToHeap(min->destinationNode, i, graph->adjMatrix.at(min->destinationNode).at(i));
+                        fr.at(i) = min->destinationNode;
+                        wt.at(i) = graph->adjMatrix.at(min->destinationNode).at(i);
+                    }
+                    else if(graph->adjMatrix.at(min->destinationNode).at(i) < wt.at(i)) {
+
+                        wt.at(i) = graph->adjMatrix.at(min->destinationNode).at(i);
+                        fr.at(i) = min->destinationNode;
+                        fringe->FindAndUpdateHeapElement(i, graph->adjMatrix.at(min->destinationNode).at(i));
                     }
                 }
             }
 
             graph->minSpanningTree = st;
 
-            // delete pointers
-            delete countQueuePtr;
+            delete fringe;
         }
 
         // !! necessary functions for kruskals algorithm
 
         // union-find algorithm to solve connectivity problem
-        bool UnionFind(ElementPointer inputEdge) {
+        bool UnionCycle(ElementPointer inputEdge) {
 
             int firstNode = inputEdge->originNode;
             int secondNode = inputEdge->destinationNode;
@@ -438,7 +452,7 @@ class GraphAdtWeighted : GraphAdtInterface {
                 std::cout << "destination node of current edge: " << currentElement->destinationNode << std::endl;
                 std::cout << "weight of current edge: " << currentElement->weight << std::endl;
 
-                if(!UnionFind(currentElement)) {
+                if(!UnionCycle(currentElement)) {
 
                     minSpanningTree->adjMatrix.at(currentElement->originNode).at(currentElement->destinationNode) 
                         = currentElement->weight;
@@ -452,9 +466,19 @@ class GraphAdtWeighted : GraphAdtInterface {
             }
         }
 
-        // kruskals algorithm with quick sort implementation to only sort as many edges that are needed
-        void ModifiedKruskals() {
+        // Boruvka's MST algorithm
+        void Boruvkas() {
 
+            /*
+            algorithm in a nutshell:
+                1. maintain vertex-indexed array that holds information about nearest mst subtree neighbor
+                2. scan through each edge, if it connects two vertices in same tree (their union ids are the same) discard that edge
+                3. Otherwise, check the nearest-neighbor distances/weights and update them in vertex-indexed array if necessary
+                4. from vertex-indexed array perform union operations on all edges that connect vertices with nearest neighbor
+            */
 
+            /* algorithm runs in in O(E lg V log * E)
+            proof: at each stage, number of substrees is atleast halved (log V iterations). Each iteration contains E union find operations
+            is less than E log * E which is essentially linear
         }
 };

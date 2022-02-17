@@ -33,7 +33,7 @@ class heap {
             ++heapSize;
         }
 
-        std::vector<std::shared_ptr<heapElement>> getHeap() {
+        std::vector<std::shared_ptr<heapElement>> getHeap() const {
 
             return fringeHeap;
         }
@@ -44,13 +44,13 @@ class heap {
             int index = fringeHeap.size() - 1;
             if(index != 0) {
 
-                while(index != 0 && fringeHeap.at(index)->weight < fringeHeap.at(((index + 1) / 2) - 1)->weight) {
+                while(index != 0 && fringeHeap.at(index)->weight < fringeHeap.at(index / 2)->weight) {
 
                     std::shared_ptr<heapElement> placeholder = fringeHeap.at(index);
-                    fringeHeap.at(index) = fringeHeap.at(((index + 1) / 2) - 1);
-                    fringeHeap.at(((index + 1) / 2) - 1) = placeholder;
+                    fringeHeap.at(index) = std::move(fringeHeap.at(index / 2));
+                    fringeHeap.at(index / 2) = std::move(placeholder);
 
-                    index = ((index + 1) / 2) - 1;
+                    index /= 2;
                 }
             }
         }
@@ -60,22 +60,78 @@ class heap {
             if(heapSize != 0) {
 
                 int index = 0;
-                while(fringeHeap.at(index)->weight > fringeHeap.at(((index + 1) * 2) - 1)->weight || 
-                    fringeHeap.at(index)->weight > fringeHeap.at((index + 1) * 2)->weight) {
+                while(fringeHeap.at(index)->weight > fringeHeap.at(((index + 1) * 2) - 1)->weight) {
 
-                    if(fringeHeap.at(((index + 1) * 2) - 1)->weight > fringeHeap.at((index + 1) * 2)->weight) {
+                    std::shared_ptr<heapElement> placeholder = std::move(fringeHeap.at(index));
+                    fringeHeap.at(index) = std::move(fringeHeap.at(((index + 1) * 2) - 1));
 
-                        std::shared_ptr<heapElement> placeholder = fringeHeap.at(index);
-                        fringeHeap.at(index) = fringeHeap.at((((index + 1) * 2) - 1) + 1);
-                        fringeHeap.at((index + 1) * 2) = placeholder;
+                    if(placeholder->weight > fringeHeap.at((index + 1) * 2)) {
+
+                        fringeHeap.at(((index + 1) * 2) - 1) = std::move(fringeHeap.at((index + 1) * 2));
+                        fringeHeap.at((index + 1) * 2) = std::move(placeholder);
                     }
                     else {
 
-                        std::shared_ptr<heapElement> placeholder = fringeHeap.at(index);
-                        fringeHeap.at(index) = fringeHeap.at(((index + 1) * 2) - 1);
-                        fringeHeap.at(((index + 1) * 2) - 1) = placeholder;
+                        fringeHeap.at(((index + 1) * 2) - 1) = std::move(placeholder);
                     }
                 }
+            }
+        }
+
+        // TODO: find a way to reduce time complexity to logN
+        // TODO: fix indexation (index / 2 gives parent, index * 2 / index * 2 + 1 gives left and right child)
+        void FindAndUpdateHeapElement(int destinationNode, int newWeight) {
+
+            int index = -1;
+            bool isGreater = false;
+            for(int i = 0; i < fringeHeap.size(); ++i) {
+
+                if(fringeHeap.at(i)->destinationNode == destinationNode) {
+
+                    index = i;
+                    if(fringeHeap.at(i)->weight < newWeight) {
+
+                        isGreater = true;
+                    }
+
+                    fringeHeap.at(i)->weight = newWeight;
+                }
+            }
+
+            if(index) {
+
+                if(isGreater) {
+
+                    while(fringeHeap.at(index * 2)->weight < fringeHeap.at(index)->weight || 
+                        fringeHeap.at((index * 2) + 1)->weight < fringeHeap.at(index)->weight) {
+
+                            if(fringeHeap.at((index / 2) + 1)->weight < fringeHeap.at(index)) {
+
+                                std::shared_ptr<heapElement> placeholder = std::move(fringeHeap.at(index));
+                                fringeHeap.at(index) = std::move(fringeHeap.at(((index / 2) + 1)));
+                                fringeHeap.at((index / 2) + 1) = std::move(placeholder);
+                            }
+                            else {
+
+                                std::shared_ptr<heapElement> placeholder = std::move(fringeHeap.at(index));
+                                fringeHeap.at(index) = std::move(fringeHeap.at((index / 2));
+                                fringeHeap.at(index / 2) = std::move(placeholder);
+                            }
+                        }
+                }
+                else {
+
+                    while(fringeHeap.at(index) < fringeHeap.at(index / 2)) {
+
+                        std::shared_ptr<heapElement> placeholder = fringeHeap.at(index);
+                        fringeHeap.at(index) = std::move(fringeHeapat(index / 2));
+                        fringeHeap.at(index / 2) = std::move(placeholder);
+                    }
+                }
+            }
+            else {
+
+                std::cout << "unable to find heap element in heap" << "\n";
             }
         }
 

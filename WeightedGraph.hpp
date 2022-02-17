@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <deque>
 #include "weightedlink.hpp"
 
 #ifndef WEIGHTEDHEADER
@@ -14,6 +15,7 @@ class WeightedGraph {
 
         size_t vertices;
         int maxWeight = 0;
+        std::deque<int> mstCompletion;
 
         std::vector<std::shared_ptr<weightedlink>> adjList;
 
@@ -23,14 +25,16 @@ class WeightedGraph {
 
         // for any msts being calculated with weighted graph object
         std::vector<int> unionFind;
-
         std::vector<int> parentSize;
+        int mstTracker;
 
         WeightedGraph(size_t graphSize) {
 
             vertices = graphSize;
             orderVector = std::vector<int>(vertices, -1);
             parentSize = std::vector<int>(graphSize, 1);
+
+            mstTracker = graphSize;
 
             adjMatrix = std::vector<std::vector<int>>(vertices, std::vector<int>(vertices));
 
@@ -40,6 +44,8 @@ class WeightedGraph {
                 adjList.push_back(newLink);
 
                 unionFind.push_back(i);
+
+                mstCompletion.push_back(i);
 
                 for(int k = 0; k < vertices; ++k) {
 
